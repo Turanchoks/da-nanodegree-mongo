@@ -1,0 +1,228 @@
+=====
+NODES
+=====
+
+> db.nodes.find().count();
+720709
+
+> db.nodes.distinct('uid').length
+390
+
+> db.nodes.aggregate([
+        { $group: { _id: "$type",
+                    count: { "$sum": 1 } } },
+        { $sort: { count: -1 } }
+    ])
+
+{
+    "result" : [
+        {
+            "_id" : "node",
+            "count" : 619098
+        },
+        {
+            "_id" : "way",
+            "count" : 101611
+        }
+    ],
+    "ok" : 1
+}
+
+> db.nodes.aggregate([
+        { $group: { _id: { type: "$type", 
+                           user: "$uid"},
+                    count: { "$sum": 1 } } },
+        { $sort: { count: -1 } },
+        { $limit: 6 }
+    ])
+
+{
+    "result" : [
+        {
+            "_id" : {
+                "type" : "node",
+                "user" : "233125"
+            },
+            "count" : 442566
+        },
+        {
+            "_id" : {
+                "type" : "way",
+                "user" : "233125"
+            },
+            "count" : 67805
+        },
+        {
+            "_id" : {
+                "type" : "node",
+                "user" : "1357136"
+            },
+            "count" : 43249
+        },
+        {
+            "_id" : {
+                "type" : "node",
+                "user" : "16881"
+            },
+            "count" : 19730
+        },
+        {
+            "_id" : {
+                "type" : "node",
+                "user" : "143266"
+            },
+            "count" : 19476
+        },
+        {
+            "_id" : {
+                "type" : "node",
+                "user" : "2362961"
+            },
+            "count" : 12184
+        }
+    ],
+    "ok" : 1
+}
+
+============
+CONTRIBUTION
+============
+
+> db.nodes.aggregate([
+         { $group: { _id: "$uid",
+                     count: { "$sum": 1 } } },
+         { $sort: { count: -1 } },
+         { $limit: 1 },
+         { $group: { _id: "",
+                     total: { "$sum": "$count" } } },
+         { $project: { _id: 0, total: "$total", fraction: { $divide: [ "$total", db.nodes.find().count() ] } } }
+     ])
+{
+    "result" : [
+        {
+            "total" : 510371,
+            "fraction" : 0.7081512788101717
+        }
+    ],
+    "ok" : 1
+}
+
+> db.nodes.aggregate([
+        { $group: { _id: "$uid",
+                    count: { "$sum": 1 } } },
+        { $sort: { count: -1 } },
+        { $limit: 10 },
+        { $group: { _id: "",
+                    total: { "$sum": "$count" } } },
+        { $project: { _id: 0, total: "$total", fraction: { $divide: [ "$total", db.nodes.find().count() ] } } }
+    ])
+
+{
+    "result" : [
+        {
+            "total" : 669164,
+            "fraction" : 0.9284801494084297
+        }
+    ],
+    "ok" : 1
+}
+
+> db.nodes.aggregate([
+        { $group: { _id: "$uid",
+                    count: { "$sum": 1 } } },
+        { $sort: { count: -1 } },
+        { $limit: 100 },
+        { $group: { _id: "",
+                    total: { "$sum": "$count" } } },
+        { $project: { _id: 0, total: "$total", fraction: { $divide: [ "$total", db.nodes.find().count() ] } } }
+    ])
+
+{
+    "result" : [
+        {
+            "total" : 716726,
+            "fraction" : 0.9944734976252552
+        }
+    ],
+    "ok" : 1
+}
+
+=========
+AMENITIES
+=========
+
+> db.amenities.find().count()
+1850
+
+> db.amenities.findOne();
+{
+    "_id" : ObjectId("56ae43d60147664e2ca37dc4"),
+    "tags" : {
+        "amenity" : "cinema",
+        "name" : "Кинотеатр \"Комсомолец\""
+    },
+    "id" : "292203399",
+    "uid" : "233125"
+}
+
+
+> db.amenities.aggregate([
+        { $group: { _id: "$tags.amenity",
+                    count: { "$sum": 1 } } },
+        { $sort: { count: -1 } },
+        { $limit: 5 }
+    ])
+{
+    "result" : [
+        {
+            "_id" : "parking",
+            "count" : 281
+        },
+        {
+            "_id" : "cafe",
+            "count" : 223
+        },
+        {
+            "_id" : "pharmacy",
+            "count" : 109
+        },
+        {
+            "_id" : "restaurant",
+            "count" : 100
+        },
+        {
+            "_id" : "school",
+            "count" : 89
+        }
+    ],
+    "ok" : 1
+}
+
+> db.amenities.aggregate([
+        { $match: { "tags.amenity": "parking", }},
+        { $group: { _id: "$tags.parking", 
+                    count: { "$sum": 1 } } },
+        { $sort: { count: -1 } },
+    ])
+
+{
+    "result" : [
+        {
+            "_id" : "underground",
+            "count" : 2
+        },
+        {
+            "_id" : "multi-storey",
+            "count" : 8
+        },
+        {
+            "_id" : "surface",
+            "count" : 146
+        },
+        {
+            "_id" : null,
+            "count" : 125
+        }
+    ],
+    "ok" : 1
+}

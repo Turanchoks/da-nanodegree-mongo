@@ -1,0 +1,6 @@
+Sochi, Russia
+https://mapzen.com/data/metro-extracts
+
+Decompressed map is more than a hundred megabytes so I only keep the compressed version.
+
+"bzip2 -d sochi_russia.osm.bz2" to decompress
