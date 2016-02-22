@@ -226,3 +226,51 @@ AMENITIES
     ],
     "ok" : 1
 }
+
+========
+CONTACTS
+========
+
+> db.nodes.find({
+        "contacts.website": { $exists: true },
+        "contacts.phone": { $exists: true },
+        "tags.amenity": { $exists: true }
+    }).count()
+
+48
+
+> db.nodes.findOne({
+         "contacts.website": { $exists: true },
+         "contacts.phone": { $exists: true },
+         "tags.amenity": { $exists: true }
+     })
+
+{
+	"_id" : ObjectId("56ca463db85f834bd22df403"),
+	"contacts" : {
+		"website" : [
+			"http://www.russianpost.ru"
+		],
+		"phone" : [
+			"+7 862 264-16-21"
+		]
+	},
+	"type" : "node",
+	"id" : "643533178",
+	"tags" : {
+		"addr:housenumber" : "1",
+		"amenity" : "post_office",
+		"name" : "Отделение связи №354000",
+		"addr:postcode" : "354000",
+		"atm" : "yes",
+		"opening_hours" : "Mo-Fr 08:00-22:00; Sa-Su 09:00-18:00",
+		"operator" : "Почта России",
+		"ref" : "354000",
+		"addr:country" : "RU",
+		"addr:street" : "улица Воровского"
+	},
+	"uid" : "157864"
+}
+
+> db.nodes.find("this.contacts.phone && this.contacts.phone.length > 1").count()
+9

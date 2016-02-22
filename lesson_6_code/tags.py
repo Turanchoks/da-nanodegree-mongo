@@ -33,15 +33,21 @@ problemchars = re.compile(r'[=\+/&<>;\'"\?%#$@\,\. \t\r\n]')
 
 def key_type(element, keys):
     if element.tag == "tag":
-        # YOUR CODE HERE
         k = element.get('k')
-        print k
+
+        # Increment for lowercase tags
         if re.match(lower, k):
             keys["lower"] += 1
+
+        # Increment for lowercase with a colon tags
         elif re.match(lower_colon, k):
             keys["lower_colon"] += 1
+
+        # Increment for tags with problematic characters
         elif re.match(problemchars, k):
             keys["problemchars"] += 1
+
+        # Increment other
         else:
             keys["other"] += 1
         pass

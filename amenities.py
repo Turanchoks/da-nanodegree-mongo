@@ -8,8 +8,10 @@ def shape_element(element):
     if element.tag == "node" or element.tag == "way":
 
         for tag in element.iter('tag'):
+            # Keep only items with the "amenity" tag
             if tag.attrib['k'] == 'amenity':
 
+                # Make a dictionary of tags
                 tags = {}
 
                 for tag in element.iter('tag'):
@@ -18,6 +20,7 @@ def shape_element(element):
                 return {
                     "id": element.attrib['id'],
                     "uid": element.attrib['uid'],
+
                     "tags": tags
                 }
 

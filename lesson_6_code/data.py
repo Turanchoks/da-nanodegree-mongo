@@ -91,52 +91,63 @@ lower_colon = re.compile(r'^([a-z]|_)*:([a-z]|_)*$')
 problemchars = re.compile(r'[=\+/&<>;\'"\?%#$@\,\. \t\r\n]')
 addresschars = re.compile(r'addr:(\w+)')
 
-CREATED = [ "version", "changeset", "timestamp", "user", "uid"]
+CREATED = ["version", "changeset", "timestamp", "user", "uid"]
 
 
 def shape_element(element):
     node = {}
-    if element.tag == "node" or element.tag == "way" :
-        # YOUR CODE HERE
+    if element.tag == "node" or element.tag == "way":
+        # Get primary attributes
         node = {
-                'id':element.attrib['id'],
-                'type':element.tag,
-                'created': {
-                                'changeset':element.attrib['changeset'],
-                                'user':element.attrib['user'],
-                                'version':element.attrib['version'],
-                                'uid':element.attrib['uid'],
-                                'timestamp':element.attrib['timestamp']
-                           }
-                }
+            'id': element.attrib['id'],
+            'type': element.tag,
+            'created': {
+                'changeset': element.attrib['changeset'],
+                'user': element.attrib['user'],
+                'version': element.attrib['version'],
+                'uid': element.attrib['uid'],
+                'timestamp': element.attrib['timestamp']
+            }
+        }
+        
+        # Trying to get position as they might be absent
         try:
-            node['pos']=[float(element.attrib['lat']),float(element.attrib['lon'])]
-            node['visible']=element.attrib['visible']
+            node['pos'] = [float(element.attrib['lat']),
+                           float(element.attrib['lon'])]
+            node['visible'] = element.attrib['visible']
         except KeyError:
             pass
 
-        for stag in element.iter('tag'):
+
+        # Get address 
+        for tag in element.iter('tag'):
+
             if 'address' not in node.keys():
                 node['address'] = {}
-            k = stag.attrib['k']
-            v = stag.attrib['v']
+
+            k = tag.attrib['k']
+            v = tag.attrib['v']
+
             if k.startswith('addr:'):
                 if len(k.split(':')) == 2:
                     content = addresschars.search(k)
                     if content:
                         node['address'][content.group(1)] = v
             else:
-                node[k]=v
+                node[k] = v
+
+        # Get refs for way items
         if element.tag == "way":
             node['node_refs'] = []
             for nd in element.iter('nd'):
                 node['node_refs'].append(nd.attrib['ref'])
+        
         return node
     else:
         return None
 
 
-def process_map(file_in, pretty = False):
+def process_map(file_in, pretty=False):
     # You do not need to change this file
     file_out = "{0}.json".format(file_in)
     data = []
@@ -146,38 +157,39 @@ def process_map(file_in, pretty = False):
             if el:
                 data.append(el)
                 if pretty:
-                    fo.write(json.dumps(el, indent=2)+"\n")
+                    fo.write(json.dumps(el, indent=2) + "\n")
                 else:
                     fo.write(json.dumps(el) + "\n")
     return data
 
+
 def test():
-    # NOTE: if you are running this code on your computer, with a larger dataset, 
-    # call the process_map procedure with pretty=False. The pretty=True option adds 
+    # NOTE: if you are running this code on your computer, with a larger dataset,
+    # call the process_map procedure with pretty=False. The pretty=True option adds
     # additional spaces to the output, making it significantly larger.
     data = process_map('example.osm', True)
-    #pprint.pprint(data)
-    
+    # pprint.pprint(data)
+
     correct_first_elem = {
-        "id": "261114295", 
-        "visible": "true", 
-        "type": "node", 
-        "pos": [41.9730791, -87.6866303], 
+        "id": "261114295",
+        "visible": "true",
+        "type": "node",
+        "pos": [41.9730791, -87.6866303],
         "created": {
-            "changeset": "11129782", 
-            "user": "bbmiller", 
-            "version": "7", 
-            "uid": "451048", 
+            "changeset": "11129782",
+            "user": "bbmiller",
+            "version": "7",
+            "uid": "451048",
             "timestamp": "2012-03-28T18:31:23Z"
         }
     }
     assert data[0] == correct_first_elem
     assert data[-1]["address"] == {
-                                    "street": "West Lexington St.", 
-                                    "housenumber": "1412"
-                                      }
-    assert data[-1]["node_refs"] == [ "2199822281", "2199822390",  "2199822392", "2199822369", 
-                                    "2199822370", "2199822284", "2199822281"]
+        "street": "West Lexington St.",
+        "housenumber": "1412"
+    }
+    assert data[-1]["node_refs"] == ["2199822281", "2199822390",  "2199822392", "2199822369",
+                                     "2199822370", "2199822284", "2199822281"]
 
 if __name__ == "__main__":
     test()
